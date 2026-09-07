@@ -84,3 +84,12 @@ INCLUDE "home/random.asm"
 INCLUDE "home/predef.asm"
 INCLUDE "home/hidden_events.asm"
 INCLUDE "home/predef_text.asm"
+
+SECTION "Atozuke Colorization Home", ROM0
+
+InitializeColor::
+	call _InitGbcMode
+	jp _Start
+
+_InitGbcMode:
+	jpfar InitGbcMode

@@ -5,20 +5,33 @@ InitGbcMode:: ; Sets double speed & clears extra memory
 	stop
 
 	; Clear memory (banks 2-7)
+;ClearGbcMemory::
+;	ld d, 7
 ClearGbcMemory::
-	ld d, 7
-.clearBank
-	ld a, d
+	ld a, 2
 	ldh [rWBK], a
+
 	xor a
-	ld hl, W2_BgPaletteData
-	ld bc, $0f00 ; Leave a bit of space for the stack
+	ld hl, $d000
+	ld bc, $0800
 	call FillMemory
-	dec d
-	ld a, d
-	dec a
-	jr nz, .clearBank
 
 	xor a
 	ldh [rWBK], a
 	ret
+
+;.clearBank
+;	ld a, d
+;	ldh [rWBK], a
+;	xor a
+;	ld hl, W2_BgPaletteData
+;	ld bc, $0f00 ; Leave a bit of space for the stack
+;	call FillMemory
+;	dec d
+;	ld a, d
+;	dec a
+;	jr nz, .clearBank
+;
+;	xor a
+;	ldh [rWBK], a
+;	ret

@@ -414,3 +414,7 @@ ELIF DEF(_ESP)
 ELSE
 	INCLUDE "data/items/names.asm"
 ENDC
+
+SECTION "Atozuke CGB Core", ROMX
+
+INCLUDE "color/init.asm"
