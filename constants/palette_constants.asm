@@ -22,6 +22,10 @@
 	const SET_PAL_SURFING_RAICHU         ; $10
 	; marcelnote - revamped Bill's PC
 	const SET_PAL_BILLS_PC             ; $11
+	;seyleonhartnote - Color donor
+	const SET_PAL_OAK_INTRO                ; $12
+	const SET_PAL_NAMING_SCREEN            ; $13
+	const SET_PAL_BATTLE_AFTER_BLACK       ; $14
 
 DEF SET_PAL_PARTY_MENU_HP_BARS EQU $fc
 DEF SET_PAL_DEFAULT EQU $ff
@@ -75,4 +79,7 @@ DEF SET_PAL_DEFAULT EQU $ff
 	const PAL_PIKACHUS_BEACH_TITLE ; $28
 	const PAL_SURFING_HISCORE      ; $29
 	const PAL_SURFING_RAICHU       ; $2A
+	; Atozuke CGB additions
+	const PAL_TOWNMAP2	; $2B
+	const PAL_SLOTS5	; $2C
 DEF NUM_SGB_PALS EQU const_value

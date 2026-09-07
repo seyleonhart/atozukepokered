@@ -7,6 +7,14 @@ MACRO CALL_INDIRECT
 	rst _Bankswitch ;Atozuke edit from 18
 ENDM
 
+; Compatibility with pokered-gbc.
+; Yume calls this operation "callfar".
+MACRO farcall
+	ld hl, \1
+	ld b, BANK(\1)
+	rst _Bankswitch
+ENDM
+
 MACRO tilepal
 ; vram bank, pals
 ; without some code rewrites, only vram0 is usable for now

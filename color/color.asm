@@ -1,5 +1,12 @@
+; Phase 1: use the donor's non-GEN_2_GRAPHICS color paths.
+; Yume's selectable Gen-II graphics will be integrated separately in Phase 2.
+IF !DEF(GEN_2_GRAPHICS)
+	DEF GEN_2_GRAPHICS EQU 0
+ENDC
+
 ; Extending bank 1C, same bank as engine/palettes.asm (for "SetPal" functions)
-SECTION "bank1C_extension", ROMX
+;SECTION "bank1C_extension", ROMX
+SECTION "Atozuke CGB Palette Commands", ROMX
 
 ; Set all palettes to black at beginning of battle
 SetPal_BattleBlack:
@@ -943,23 +950,50 @@ LoadTitleMonTilesAndPalettes:
 	ret
 
 
-; Everything else goes in bank $2C (unused by original game)
-SECTION "bank2C", ROMX
+;; Everything else goes in bank $2C (unused by original game)
+;SECTION "bank2C", ROMX
+;
+;INCLUDE "color/init.asm"
+;INCLUDE "color/refreshmaps.asm"
+;INCLUDE "color/loadpalettes.asm"
+;
+;INCLUDE "color/vblank.asm"
+;INCLUDE "color/sprites.asm"
+;INCLUDE "color/ssanne.asm"
+;INCLUDE "color/boulder.asm"
+;INCLUDE "color/super_palettes.asm"
+;
+;INCLUDE "color/data/badgepalettemap.asm"
+;
+;INCLUDE "color/dmg.asm"
+;
+;; Copy of sound engine used by dmg-mode to play jingle
+;SECTION "bank31", ROMX
+;INCBIN "color/data/bank31.bin", $0000, $c8000 - $c4000
 
-INCLUDE "color/init.asm"
-INCLUDE "color/refreshmaps.asm"
-INCLUDE "color/loadpalettes.asm"
+; Determine palette for a player's/back-facing Pokemon sprite.
+; Adapted from pokered-gbc.
+DetermineBackSpritePaletteID:
+	ld [wPokedexNum], a
+	and a
 
-INCLUDE "color/vblank.asm"
-INCLUDE "color/sprites.asm"
-INCLUDE "color/ssanne.asm"
-INCLUDE "color/boulder.asm"
-INCLUDE "color/super_palettes.asm"
+	push bc
+	predef IndexToPokedex
+	pop bc
 
-INCLUDE "color/data/badgepalettemap.asm"
+	ld a, [wPokedexNum]
+	ld hl, MonsterPalettes
+	and a
+	jr nz, .getPaletteID
 
-INCLUDE "color/dmg.asm"
+	; A zero dex number here represents the player/trainer sprite.
+	; Phase 1 uses the original RBY-style player palette.
+	ld a, PAL_REDMON
+	ret
 
-; Copy of sound engine used by dmg-mode to play jingle
-SECTION "bank31", ROMX
-INCBIN "color/data/bank31.bin", $0000, $c8000 - $c4000
+.getPaletteID
+	ld e, a
+	ld d, $00
+	add hl, de
+	ld a, [hl]
+	ret

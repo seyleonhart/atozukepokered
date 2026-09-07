@@ -424,5 +424,9 @@ IF DEF(_ATOZUKE_GBC)
 	INCLUDE "color/loadpalettes.asm"
 	INCLUDE "color/vblank.asm"
 	INCLUDE "color/super_palettes.asm"
+	INCLUDE "color/sprites.asm"
+	INCLUDE "color/data/badgepalettemap.asm"
+
+	INCLUDE "color/color.asm"
 
 ENDC

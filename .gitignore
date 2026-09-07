@@ -46,4 +46,9 @@ gbc-diff-stat.txt
 gbc-phase1.diff
 phase1-audit.txt
 phase1-build-errors.txt
+phase1-palette-errors.txt
+phase1-palette-errors-2.txt
+phase1-palette-errors-3.txt
+phase1-palette-errors-4.txt
+phase1-palette-errors-*.txt
 .vscode/

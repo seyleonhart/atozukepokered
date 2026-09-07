@@ -15,10 +15,20 @@ _RunPaletteCommand:
 	ld a, [hli]
 	ld h, [hl]
 	ld l, a
-	ld de, SendSGBPackets
-	push de
-	jp hl
+	IF DEF(_ATOZUKE_GBC)
+		ld de, .cgbReturn
+		push de
+		jp hl
 
+	.cgbReturn
+		ret
+	ELSE
+		ld de, SendSGBPackets
+		push de
+		jp hl
+	ENDC
+
+IF !DEF(_ATOZUKE_GBC)
 SetPal_BattleBlack:
 	ld hl, PalPacket_Black
 	ld de, BlkPacket_Battle
@@ -280,6 +290,7 @@ SetPal_TrainerCard:
 	ld hl, PalPacket_TrainerCard
 	ld de, wTrainerCardBlkPacket
 	ret
+ENDC
 
 SetPal_PikachusBeach: ; marcelnote - Pikachu's Beach minigame
 	ld hl, PalPacket_PikachusBeach
@@ -328,6 +339,11 @@ SetPalFunctions:
 	dw SetPal_PikachusBeachHiscore
 	dw SetPal_SurfingRaichu
 	dw SetPal_BillsPC ; marcelnote - revamped Bill's PC
+	IF DEF(_ATOZUKE_GBC)
+		dw SetPal_OakIntro          ; $12
+		dw SetPal_NameEntry         ; $13
+		dw SetPal_BattleAfterBlack  ; $14
+	ENDC
 
 ; The length of the blk data of each badge on the Trainer Card.
 ; The Rainbow Badge has 3 entries because of its many colors.
