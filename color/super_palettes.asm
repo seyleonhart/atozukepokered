@@ -56,4 +56,4 @@ startPaletteTransfer:
 	ldh [rWBK], a
 	ret
 
-INCLUDE "data/sgb/sgb_palettes.asm"
+;INCLUDE "data/sgb/sgb_palettes.asm"

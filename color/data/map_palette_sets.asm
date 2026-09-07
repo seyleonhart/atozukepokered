@@ -1,30 +1,62 @@
 ; 8 bytes per tileset for 8 palettes, which are taken from MapPalettes.
+;MapPaletteSets:
+;	table_width 2, MapPaletteSets
+;	dw OverworldPalSet   ; OVERWORLD
+;	dw RedsHouse1PalSet  ; REDS_HOUSE_1
+;	dw MartPalSet        ; MART
+;	dw ForestPalSet      ; FOREST
+;	dw RedsHouse2PalSet  ; REDS_HOUSE_2
+;	dw DojoPalSet        ; DOJO
+;	dw PokecenterPalSet  ; POKECENTER
+;	dw GymPalSet         ; GYM
+;	dw HousePalSet       ; HOUSE
+;	dw ForestGatePalSet  ; FOREST_GATE
+;	dw MuseumPalSet      ; MUSEUM
+;	dw UndergroundPalSet ; UNDERGROUND
+;	dw GatePalSet        ; GATE
+;	dw ShipPalSet        ; SHIP
+;	dw ShipPortPalSet    ; SHIP_PORT
+;	dw CemeteryPalSet    ; CEMETERY
+;	dw InteriorPalSet    ; INTERIOR
+;	dw CavernPalSet      ; CAVERN
+;	dw LobbyPalSet       ; LOBBY
+;	dw MansionPalSet     ; MANSION
+;	dw LabPalSet         ; LAB
+;	dw ClubPalSet        ; CLUB
+;	dw FacilityPalSet    ; FACILITY
+;	dw PlateauPalSet     ; PLATEAU
+;	assert_table_length NUM_TILESETS
+
 MapPaletteSets:
 	table_width 2, MapPaletteSets
-	dw OverworldPalSet   ; OVERWORLD
-	dw RedsHouse1PalSet  ; REDS_HOUSE_1
-	dw MartPalSet        ; MART
-	dw ForestPalSet      ; FOREST
-	dw RedsHouse2PalSet  ; REDS_HOUSE_2
-	dw DojoPalSet        ; DOJO
-	dw PokecenterPalSet  ; POKECENTER
-	dw GymPalSet         ; GYM
-	dw HousePalSet       ; HOUSE
-	dw ForestGatePalSet  ; FOREST_GATE
-	dw MuseumPalSet      ; MUSEUM
-	dw UndergroundPalSet ; UNDERGROUND
-	dw GatePalSet        ; GATE
-	dw ShipPalSet        ; SHIP
-	dw ShipPortPalSet    ; SHIP_PORT
-	dw CemeteryPalSet    ; CEMETERY
-	dw InteriorPalSet    ; INTERIOR
-	dw CavernPalSet      ; CAVERN
-	dw LobbyPalSet       ; LOBBY
-	dw MansionPalSet     ; MANSION
-	dw LabPalSet         ; LAB
-	dw ClubPalSet        ; CLUB
-	dw FacilityPalSet    ; FACILITY
-	dw PlateauPalSet     ; PLATEAU
+
+	; Pokémon Yume tileset order
+	dw OverworldPalSet    ; OVERWORLD    0
+	dw RedsHouse1PalSet   ; BIG_HOUSE    1
+	dw ForestPalSet       ; FOREST       2
+	dw ForestPalSet       ; SAFARI       3 - temporary
+	dw PokecenterPalSet   ; POKECENTER   4
+	dw GymPalSet          ; GYM          5
+	dw HousePalSet        ; HOUSE        6
+	dw UndergroundPalSet  ; UNDERGROUND  7
+	dw GatePalSet         ; GATE         8
+	dw ShipPalSet         ; SHIP         9
+	dw ShipPortPalSet     ; SHIP_PORT   10
+	dw CemeteryPalSet     ; CEMETERY    11
+	dw InteriorPalSet     ; INTERIOR    12
+	dw CavernPalSet       ; CAVERN      13
+	dw LobbyPalSet        ; LOBBY       14
+	dw MansionPalSet      ; MANSION     15
+	dw LabPalSet          ; LAB         16
+	dw ClubPalSet         ; CLUB        17
+	dw FacilityPalSet     ; FACILITY    18
+	dw PlateauPalSet      ; PLATEAU     19
+	dw FacilityPalSet     ; ACADEMY     20 - temporary
+	dw CavernPalSet       ; MOUNTAIN    21 - temporary
+	dw HousePalSet        ; BEACH_HOUSE 22 - temporary
+	dw FacilityPalSet     ; PLANT       23 - temporary
+	dw InteriorPalSet     ; GAME        24 - temporary
+
 	assert_table_length NUM_TILESETS
 
 OverworldPalSet:

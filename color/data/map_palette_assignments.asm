@@ -4,32 +4,64 @@
 ; These use the pokecrystal macro for tileset palettes
 ; Also, this repo can use Polished Map's "Priority Colors" already
 ; In the event of Duplicate tilesets, the asm files are named to match the png files
+;MapPaletteAssignments:
+;	table_width 2, MapPaletteAssignments
+;	dw OverworldPalMap   ; OVERWORLD
+;	dw RedsHouse1PalMap  ; REDS_HOUSE_1
+;	dw MartPalMap        ; MART
+;	dw ForestPalMap      ; FOREST
+;	dw RedsHouse2PalMap  ; REDS_HOUSE_2
+;	dw DojoPalMap        ; DOJO
+;	dw PokecenterPalMap  ; POKECENTER
+;	dw GymPalMap         ; GYM
+;	dw HousePalMap       ; HOUSE
+;	dw ForestGatePalMap  ; FOREST_GATE
+;	dw MuseumPalMap      ; MUSEUM
+;	dw UndergroundPalMap ; UNDERGROUND
+;	dw GatePalMap        ; GATE
+;	dw ShipPalMap        ; SHIP
+;	dw ShipPortPalMap    ; SHIP_PORT
+;	dw CemeteryPalMap    ; CEMETERY
+;	dw InteriorPalMap    ; INTERIOR
+;	dw CavernPalMap      ; CAVERN
+;	dw LobbyPalMap       ; LOBBY
+;	dw MansionPalMap     ; MANSION
+;	dw LabPalMap         ; LAB
+;	dw ClubPalMap        ; CLUB
+;	dw FacilityPalMap    ; FACILITY
+;	dw PlateauPalMap     ; PLATEAU
+;	assert_table_length NUM_TILESETS
+
 MapPaletteAssignments:
 	table_width 2, MapPaletteAssignments
-	dw OverworldPalMap   ; OVERWORLD
-	dw RedsHouse1PalMap  ; REDS_HOUSE_1
-	dw MartPalMap        ; MART
-	dw ForestPalMap      ; FOREST
-	dw RedsHouse2PalMap  ; REDS_HOUSE_2
-	dw DojoPalMap        ; DOJO
-	dw PokecenterPalMap  ; POKECENTER
-	dw GymPalMap         ; GYM
-	dw HousePalMap       ; HOUSE
-	dw ForestGatePalMap  ; FOREST_GATE
-	dw MuseumPalMap      ; MUSEUM
-	dw UndergroundPalMap ; UNDERGROUND
-	dw GatePalMap        ; GATE
-	dw ShipPalMap        ; SHIP
-	dw ShipPortPalMap    ; SHIP_PORT
-	dw CemeteryPalMap    ; CEMETERY
-	dw InteriorPalMap    ; INTERIOR
-	dw CavernPalMap      ; CAVERN
-	dw LobbyPalMap       ; LOBBY
-	dw MansionPalMap     ; MANSION
-	dw LabPalMap         ; LAB
-	dw ClubPalMap        ; CLUB
-	dw FacilityPalMap    ; FACILITY
-	dw PlateauPalMap     ; PLATEAU
+
+	; Pokémon Yume tileset order
+	dw OverworldPalMap        ; OVERWORLD    0
+	dw RedsHouse1PalMap       ; BIG_HOUSE    1
+	dw ForestPalMap           ; FOREST       2
+	dw YumeUnportedPalMap     ; SAFARI       3
+	dw PokecenterPalMap       ; POKECENTER   4
+	dw GymPalMap              ; GYM          5
+	dw HousePalMap            ; HOUSE        6
+	dw UndergroundPalMap      ; UNDERGROUND  7
+	dw GatePalMap             ; GATE         8
+	dw ShipPalMap             ; SHIP         9
+	dw ShipPortPalMap         ; SHIP_PORT   10
+	dw CemeteryPalMap         ; CEMETERY    11
+	dw InteriorPalMap         ; INTERIOR    12
+	dw CavernPalMap           ; CAVERN      13
+	dw LobbyPalMap            ; LOBBY       14
+	dw MansionPalMap          ; MANSION     15
+	dw LabPalMap              ; LAB         16
+	dw ClubPalMap             ; CLUB        17
+	dw FacilityPalMap         ; FACILITY    18
+	dw PlateauPalMap          ; PLATEAU     19
+	dw YumeUnportedPalMap     ; ACADEMY     20
+	dw YumeUnportedPalMap     ; MOUNTAIN    21
+	dw YumeUnportedPalMap     ; BEACH_HOUSE 22
+	dw YumeUnportedPalMap     ; PLANT       23
+	dw YumeUnportedPalMap     ; GAME        24
+
 	assert_table_length NUM_TILESETS
 
 OverworldPalMap:
@@ -93,3 +125,10 @@ FacilityPalMap:
 
 PlateauPalMap:
 	INCLUDE "color/tilesets/plateau.asm"
+
+; Temporary palette assignment for Yume-exclusive tilesets.
+; Gives every tile palette 0 until a proper CGB palette map is authored.
+YumeUnportedPalMap:
+	REPT MAP_TILESET_SIZE
+		db PAL_BG_GRAY
+	ENDR

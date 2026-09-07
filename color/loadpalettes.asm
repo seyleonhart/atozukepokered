@@ -117,9 +117,22 @@ LoadTilesetPalette:
 	ld [hli], a
 	ld [hli], a
 .notCeladonRoof
-	; Check for celadon 1st floor (change bench color from blue to yellow)
+;	; Check for celadon 1st floor (change bench color from blue to yellow)
+;	ld a, b
+;	cp CELADON_MART_1F
+;	jr nz, .notCeladon1st
+;	ld hl, W2_TilesetPaletteMap + $07
+;	ld a, PAL_BG_YELLOW
+;	ld [hli], a
+;	ld [hli], a
+;	ld l, $17
+;	ld [hli], a
+;	ld [hli], a
+;.notCeladon1st
+; Yume merges Celadon Mart 1F/2F/3F into one map.
+; Temporary: apply donor's 1F bench palette tweak to the merged map.
 	ld a, b
-	cp CELADON_MART_1F
+	cp CELADON_MART_1F2F3F
 	jr nz, .notCeladon1st
 	ld hl, W2_TilesetPaletteMap + $07
 	ld a, PAL_BG_YELLOW

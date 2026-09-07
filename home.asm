@@ -93,3 +93,10 @@ InitializeColor::
 
 _InitGbcMode:
 	jpfar InitGbcMode
+
+; Set the currently loaded switchable ROM bank.
+; Required by the pokered-gbc color engine.
+SetRomBank::
+	ldh [hLoadedROMBank], a
+	ld [rROMB], a
+	ret
