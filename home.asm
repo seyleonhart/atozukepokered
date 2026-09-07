@@ -85,18 +85,22 @@ INCLUDE "home/predef.asm"
 INCLUDE "home/hidden_events.asm"
 INCLUDE "home/predef_text.asm"
 
-SECTION "Atozuke Colorization Home", ROM0
+IF DEF(_ATOZUKE_GBC)
 
-InitializeColor::
-	call _InitGbcMode
-	jp _Start
+    SECTION "Atozuke Colorization Home", ROM0
 
-_InitGbcMode:
-	jpfar InitGbcMode
+    InitializeColor::
+        call _InitGbcMode
+        jp _Start
 
-; Set the currently loaded switchable ROM bank.
-; Required by the pokered-gbc color engine.
-SetRomBank::
-	ldh [hLoadedROMBank], a
-	ld [rROMB], a
-	ret
+    _InitGbcMode:
+        jpfar InitGbcMode
+
+    ; Set the currently loaded switchable ROM bank.
+    ; Required by the pokered-gbc color engine.
+    SetRomBank::
+        ldh [hLoadedROMBank], a
+        ld [rROMB], a
+        ret
+
+ENDC

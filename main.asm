@@ -415,10 +415,14 @@ ELSE
 	INCLUDE "data/items/names.asm"
 ENDC
 
-SECTION "Atozuke CGB Core", ROMX
+IF DEF(_ATOZUKE_GBC)
 
-INCLUDE "color/init.asm"
-INCLUDE "color/refreshmaps.asm"
-INCLUDE "color/loadpalettes.asm"
-INCLUDE "color/vblank.asm"
-INCLUDE "color/super_palettes.asm"
+	SECTION "Atozuke CGB Core", ROMX
+
+	INCLUDE "color/init.asm"
+	INCLUDE "color/refreshmaps.asm"
+	INCLUDE "color/loadpalettes.asm"
+	INCLUDE "color/vblank.asm"
+	INCLUDE "color/super_palettes.asm"
+
+ENDC

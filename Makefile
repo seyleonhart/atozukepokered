@@ -159,6 +159,14 @@ check-pngs:
 
 
 RGBASMFLAGS += -Q8 -P includes.asm
+
+#Atozuke GBC build flag. If set to 1, the build will include Atozuke GBC features.
+ATOZUKE_GBC ?= 0
+
+ifeq ($(ATOZUKE_GBC),1)
+RGBASMFLAGS += -D _ATOZUKE_GBC
+endif
+
 # Create a sym/map for debug purposes if `make` run with `DEBUG=1`
 ifeq ($(DEBUG),1)
 RGBASMFLAGS += -E

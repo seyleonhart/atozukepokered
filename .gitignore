@@ -40,3 +40,9 @@ docs/todo/
 
 # DataSpell
 .idea/
+
+gbc-diff-full.txt
+gbc-diff-stat.txt
+gbc-phase1.diff
+phase1-audit.txt
+phase1-build-errors.txt
