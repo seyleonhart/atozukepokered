@@ -8,6 +8,7 @@ INCLUDE "macros/gfx.asm"
 INCLUDE "macros/coords.asm"
 INCLUDE "macros/vc.asm"
 INCLUDE "macros/color.asm"
+INCLUDE "color/wram.asm"
 
 ;INCLUDE "macros/scripts/audio.asm"
 INCLUDE "macros/scripts/gfx_anims.asm" ; marcelnote - Pikachu's Beach minigame
