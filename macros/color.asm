@@ -4,7 +4,7 @@
 MACRO CALL_INDIRECT
 	ld b, BANK(\1)
 	ld hl, \1
-	rst $18
+	rst _Bankswitch ;Atozuke edit from 18
 ENDM
 
 MACRO tilepal
