@@ -91,8 +91,12 @@ IF DEF(_ATOZUKE_GBC)
 
     InitializeColor::
         call _InitGbcMode
-        jp _Start
 
+        ; _Start uses the boot A value to detect CGB hardware.
+        ; InitGbcMode clobbers A, so restore the CGB boot value.
+        ld a, BOOTUP_A_CGB
+        jp _Start
+        
     _InitGbcMode:
         jpfar InitGbcMode
 

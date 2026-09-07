@@ -165,6 +165,7 @@ ATOZUKE_GBC ?= 0
 
 ifeq ($(ATOZUKE_GBC),1)
 RGBASMFLAGS += -D _ATOZUKE_GBC
+RGBFIXFLAGS += -C
 endif
 
 # Create a sym/map for debug purposes if `make` run with `DEBUG=1`
