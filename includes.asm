@@ -8,7 +8,6 @@ INCLUDE "macros/gfx.asm"
 INCLUDE "macros/coords.asm"
 INCLUDE "macros/vc.asm"
 INCLUDE "macros/color.asm"
-INCLUDE "color/wram.asm"
 
 ;INCLUDE "macros/scripts/audio.asm"
 INCLUDE "macros/scripts/gfx_anims.asm" ; marcelnote - Pikachu's Beach minigame
@@ -63,6 +62,9 @@ INCLUDE "constants/tileset_constants.asm"
 INCLUDE "constants/event_constants.asm"
 INCLUDE "constants/text_constants.asm"
 INCLUDE "constants/menu_constants.asm"
+
+INCLUDE "color/wram.asm"
+INCLUDE "color/data/map_palette_constants.asm"
 
 IF DEF(_RED_VC)
 	INCLUDE "vc/pokered.constants.asm"

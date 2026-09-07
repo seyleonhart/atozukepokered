@@ -17,6 +17,11 @@ SECTION "rst10", ROM0[$0010]
 
 	ds $18 - @, 0 ; unused
 
+;SECTION "rst10", ROM0[$0010] ;color bankswitch
+;	ld b, BANK(GbcVBlankHook)
+;	ld hl, GbcVBlankHook
+;	rst _Bankswitch
+
 SECTION "rst18", ROM0[$0018]
 	rst $38
 

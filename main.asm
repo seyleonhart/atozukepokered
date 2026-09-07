@@ -418,3 +418,7 @@ ENDC
 SECTION "Atozuke CGB Core", ROMX
 
 INCLUDE "color/init.asm"
+INCLUDE "color/refreshmaps.asm"
+INCLUDE "color/loadpalettes.asm"
+INCLUDE "color/vblank.asm"
+INCLUDE "color/super_palettes.asm"
