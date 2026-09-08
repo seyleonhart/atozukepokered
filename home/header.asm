@@ -12,15 +12,22 @@ SECTION "rst8", ROM0[$0008] ; PureRGB - Predef as rst, replaces call Predef
 
 	ds $10 - @, 0 ; unused
 
+; SECTION "rst10", ROM0[$0010]
+; 	rst $38
+
+; 	ds $18 - @, 0 ; unused
+
 SECTION "rst10", ROM0[$0010]
+IF DEF(_ATOZUKE_GBC)
+	ld b, BANK(GbcVBlankHook)
+	ld hl, GbcVBlankHook
+	rst _Bankswitch
+	ret
+ELSE
 	rst $38
+ENDC
 
-	ds $18 - @, 0 ; unused
-
-;SECTION "rst10", ROM0[$0010] ;color bankswitch
-;	ld b, BANK(GbcVBlankHook)
-;	ld hl, GbcVBlankHook
-;	rst _Bankswitch
+	ds $18 - @, 0
 
 SECTION "rst18", ROM0[$0018]
 	rst $38

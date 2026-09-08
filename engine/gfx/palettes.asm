@@ -7,26 +7,71 @@ _RunPaletteCommand:
 .notDefault
 	cp SET_PAL_PARTY_MENU_HP_BARS
 	jp z, UpdatePartyMenuBlkPacket
+	; ld l, a
+	; ld h, 0
+	; add hl, hl
+	; ld de, SetPalFunctions
+	; add hl, de
+	; ld a, [hli]
+	; ld h, [hl]
+	; ld l, a
+	; IF DEF(_ATOZUKE_GBC)
+	; 	ld de, .cgbReturn
+	; 	push de
+	; 	jp hl
+
+	; .cgbReturn
+	; 	ret
+	; ELSE
+	; 	ld de, SendSGBPackets
+	; 	push de
+	; 	jp hl
+	; ENDC
 	ld l, a
 	ld h, 0
+
+IF DEF(_ATOZUKE_GBC)
+
+	; GBC table entries are:
+	;   db BANK(function)
+	;   dw function
+	;
+	; HL = command * 3
+	ld e, l
+	ld d, h
+	add hl, hl
+	add hl, de
+
+	ld de, SetPalFunctions
+	add hl, de
+
+	; Read far pointer.
+	ld b, [hl]       ; target ROM bank
+	inc hl
+	ld a, [hli]      ; target address low
+	ld h, [hl]       ; target address high
+	ld l, a
+
+	; Call SetPal_* in its actual ROM bank.
+	rst _Bankswitch
+	ret
+
+ELSE
+
+	; Original GB/SGB table uses 16-bit same-bank pointers.
 	add hl, hl
 	ld de, SetPalFunctions
 	add hl, de
+
 	ld a, [hli]
 	ld h, [hl]
 	ld l, a
-	IF DEF(_ATOZUKE_GBC)
-		ld de, .cgbReturn
-		push de
-		jp hl
 
-	.cgbReturn
-		ret
-	ELSE
-		ld de, SendSGBPackets
-		push de
-		jp hl
-	ENDC
+	ld de, SendSGBPackets
+	push de
+	jp hl
+
+ENDC
 
 IF !DEF(_ATOZUKE_GBC)
 SetPal_BattleBlack:
@@ -317,33 +362,68 @@ SetPal_BillsPC: ; marcelnote - revamped Bill's PC
 	ld de, BlkPacket_BillsPC
 	ret
 
+MACRO setpal_entry
+IF DEF(_ATOZUKE_GBC)
+	db BANK(\1)
+ENDC
+	dw \1
+ENDM
+
+; SetPalFunctions:
+; ; entries correspond to SET_PAL_* constants
+; 	dw SetPal_BattleBlack
+; 	dw SetPal_Battle
+; 	dw SetPal_TownMap
+; 	dw SetPal_StatusScreen
+; 	dw SetPal_Pokedex
+; 	dw SetPal_Slots
+; 	dw SetPal_TitleScreen
+; 	dw SetPal_NidorinoIntro
+; 	dw SetPal_Generic
+; 	dw SetPal_Overworld
+; 	dw SetPal_PartyMenu
+; 	dw SetPal_PokemonWholeScreen
+; 	dw SetPal_GameFreakIntro
+; 	dw SetPal_TrainerCard
+; 	; marcelnote - Pikachu's Beach minigame
+; ;	dw SetPal_PikachusBeachTitle
+; 	dw SetPal_PikachusBeach
+; 	dw SetPal_PikachusBeachHiscore
+; 	dw SetPal_SurfingRaichu
+; 	dw SetPal_BillsPC ; marcelnote - revamped Bill's PC
+; IF DEF(_ATOZUKE_GBC)
+; 	dw SetPal_OakIntro          ; $12
+; 	dw SetPal_NameEntry         ; $13
+; 	dw SetPal_BattleAfterBlack  ; $14
+; ENDC
+
 SetPalFunctions:
-; entries correspond to SET_PAL_* constants
-	dw SetPal_BattleBlack
-	dw SetPal_Battle
-	dw SetPal_TownMap
-	dw SetPal_StatusScreen
-	dw SetPal_Pokedex
-	dw SetPal_Slots
-	dw SetPal_TitleScreen
-	dw SetPal_NidorinoIntro
-	dw SetPal_Generic
-	dw SetPal_Overworld
-	dw SetPal_PartyMenu
-	dw SetPal_PokemonWholeScreen
-	dw SetPal_GameFreakIntro
-	dw SetPal_TrainerCard
-	; marcelnote - Pikachu's Beach minigame
-;	dw SetPal_PikachusBeachTitle
-	dw SetPal_PikachusBeach
-	dw SetPal_PikachusBeachHiscore
-	dw SetPal_SurfingRaichu
-	dw SetPal_BillsPC ; marcelnote - revamped Bill's PC
-	IF DEF(_ATOZUKE_GBC)
-		dw SetPal_OakIntro          ; $12
-		dw SetPal_NameEntry         ; $13
-		dw SetPal_BattleAfterBlack  ; $14
-	ENDC
+	setpal_entry SetPal_BattleBlack         ; $00
+	setpal_entry SetPal_Battle              ; $01
+	setpal_entry SetPal_TownMap             ; $02
+	setpal_entry SetPal_StatusScreen        ; $03
+	setpal_entry SetPal_Pokedex             ; $04
+	setpal_entry SetPal_Slots               ; $05
+	setpal_entry SetPal_TitleScreen         ; $06
+	setpal_entry SetPal_NidorinoIntro       ; $07
+	setpal_entry SetPal_Generic             ; $08
+	setpal_entry SetPal_Overworld           ; $09
+	setpal_entry SetPal_PartyMenu           ; $0A
+	setpal_entry SetPal_PokemonWholeScreen  ; $0B
+	setpal_entry SetPal_GameFreakIntro      ; $0C
+	setpal_entry SetPal_TrainerCard         ; $0D
+
+	; Yume extensions
+	setpal_entry SetPal_PikachusBeach       ; $0E
+	setpal_entry SetPal_PikachusBeachHiscore ; $0F
+	setpal_entry SetPal_SurfingRaichu       ; $10
+	setpal_entry SetPal_BillsPC             ; $11
+
+IF DEF(_ATOZUKE_GBC)
+	setpal_entry SetPal_OakIntro             ; $12
+	setpal_entry SetPal_NameEntry            ; $13
+	setpal_entry SetPal_BattleAfterBlack     ; $14
+ENDC
 
 ; The length of the blk data of each badge on the Trainer Card.
 ; The Rainbow Badge has 3 entries because of its many colors.

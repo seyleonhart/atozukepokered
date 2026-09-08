@@ -34,13 +34,26 @@ GBPalWhiteOut::
 	ldh [rOBP1], a
 	ret
 
+; RunDefaultPaletteCommand::
+; 	ld b, SET_PAL_DEFAULT
+; RunPaletteCommand::
+; 	ld a, [wOnSGB]
+; 	and a
+; 	ret z
+; 	predef_jump _RunPaletteCommand
+
 RunDefaultPaletteCommand::
 	ld b, SET_PAL_DEFAULT
+
 RunPaletteCommand::
+IF DEF(_ATOZUKE_GBC)
+	predef_jump _RunPaletteCommand
+ELSE
 	ld a, [wOnSGB]
 	and a
 	ret z
 	predef_jump _RunPaletteCommand
+ENDC
 
 GetHealthBarColor::
 ; Return at hl the palette of

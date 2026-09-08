@@ -39,6 +39,9 @@ VBlank::
 	bit 0, a
 	call z, hDMARoutine
 ;;;;;;;;;;;;;;;;
+	IF DEF(_ATOZUKE_GBC)
+		rst $10
+	ENDC
 	;call hDMARoutine
 	;ld a, BANK(PrepareOAMData)
 	;ldh [hLoadedROMBank], a

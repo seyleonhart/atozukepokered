@@ -264,39 +264,152 @@ ENDR
 	ldh [rWBK], a
 	ret
 
+; GbcVBlankHook::
+; 	push af
 
-; This is the last vblank-timing-sensitive thing that's called
+; 	; Diagnostic palette:
+; 	; color 0 = white
+; 	; color 1 = red
+; 	; color 2 = green
+; 	; color 3 = blue
+; 	;
+; 	; This is deliberately ugly so we can clearly tell
+; 	; whether native CGB palette RAM is being used.
+
+; 	ld a, $80 ; palette 0, color 0, auto-increment
+; 	ldh [rBGPI], a
+
+; 	; White = $7fff
+; 	ld a, $ff
+; 	ldh [rBGPD], a
+; 	ld a, $7f
+; 	ldh [rBGPD], a
+
+; 	; Red = $001f
+; 	ld a, $1f
+; 	ldh [rBGPD], a
+; 	xor a
+; 	ldh [rBGPD], a
+
+; 	; Green = $03e0
+; 	ld a, $e0
+; 	ldh [rBGPD], a
+; 	ld a, $03
+; 	ldh [rBGPD], a
+
+; 	; Blue = $7c00
+; 	xor a
+; 	ldh [rBGPD], a
+; 	ld a, $7c
+; 	ldh [rBGPD], a
+
+; 		; Diagnostic: initialize all 8 CGB OBJ palettes.
+; 	; Each one gets:
+; 	;   color 0 = white
+; 	;   color 1 = red
+; 	;   color 2 = green
+; 	;   color 3 = blue
+
+; 	ld a, $80
+; 	ldh [rOBPI], a
+
+; 	REPT 8
+; 		; White = $7fff
+; 		ld a, $ff
+; 		ldh [rOBPD], a
+; 		ld a, $7f
+; 		ldh [rOBPD], a
+
+; 		; Red = $001f
+; 		ld a, $1f
+; 		ldh [rOBPD], a
+; 		xor a
+; 		ldh [rOBPD], a
+
+; 		; Green = $03e0
+; 		ld a, $e0
+; 		ldh [rOBPD], a
+; 		ld a, $03
+; 		ldh [rOBPD], a
+
+; 		; Blue = $7c00
+; 		xor a
+; 		ldh [rOBPD], a
+; 		ld a, $7c
+; 		ldh [rOBPD], a
+; 	ENDR
+
+; 	pop af
+; 	ret
+
 GbcVBlankHook::
-	call UpdateMovingBgTiles ; Removed from caller to make space
+	push af
+	push bc
+	push hl
 
-	; Use the hblank interrupt to get a head-start with vblank stuff
-	ldh a, [rIE]
-	or 2
-	ldh [rIE], a
-	ld a, $6e
-	ldh [rLYC], a
-	ldh a, [rSTAT]
-	or $40
-	ldh [rSTAT], a
+	; Save current WRAM bank in B.
+	; Do not store it on the stack, because the stack itself
+	; lives in the switchable $D000-$DFFF region.
+	ldh a, [rWBK]
+	ld b, a
 
 	ld a, 2
 	ldh [rWBK], a
 
-	; Don't try to refresh palette if a row or column was drawn this frame.
-	; This isn't really necessary, but it prevents a 1-frame artifact that occurs when
-	; transitioning between screens, where all sprites are white.
-	ld hl, W2_DrewRowOrColumn
-	ld a, [hl]
-	and a
-	jr nz, .end
+	; Upload only real BG palette 0.
+	ld a, $80
+	ldh [rBGPI], a
 
-	call RefreshPalettesVBlank
+	ld hl, W2_BgPaletteData
+	ld c, 8
 
-.end
-	xor a
-	ld [W2_DrewRowOrColumn], a
+.loop
+	ld a, [hli]
+	ldh [rBGPD], a
+	dec c
+	jr nz, .loop
+
+	; Restore the original WRAM bank BEFORE touching the stack.
+	ld a, b
 	ldh [rWBK], a
+
+	pop hl
+	pop bc
+	pop af
 	ret
+
+; ; This is the last vblank-timing-sensitive thing that's called
+; GbcVBlankHook::
+; 	call UpdateMovingBgTiles ; Removed from caller to make space
+
+; 	; Use the hblank interrupt to get a head-start with vblank stuff
+; 	ldh a, [rIE]
+; 	or 2
+; 	ldh [rIE], a
+; 	ld a, $6e
+; 	ldh [rLYC], a
+; 	ldh a, [rSTAT]
+; 	or $40
+; 	ldh [rSTAT], a
+
+; 	ld a, 2
+; 	ldh [rWBK], a
+
+; 	; Don't try to refresh palette if a row or column was drawn this frame.
+; 	; This isn't really necessary, but it prevents a 1-frame artifact that occurs when
+; 	; transitioning between screens, where all sprites are white.
+; 	ld hl, W2_DrewRowOrColumn
+; 	ld a, [hl]
+; 	and a
+; 	jr nz, .end
+
+; 	call RefreshPalettesVBlank
+
+; .end
+; 	xor a
+; 	ld [W2_DrewRowOrColumn], a
+; 	ldh [rWBK], a
+; 	ret
 
 ; If necessary, copy palettes which were generated in the pre-vblank routines.
 ; It takes ~1024 cycles (1.1 scanlines) to write 8 palettes.

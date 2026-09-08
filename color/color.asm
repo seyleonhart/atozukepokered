@@ -104,9 +104,24 @@ SetPal_Battle_Common:
 	ld b, a
 
 .getEnemyMonPal
-	ld a, [wEnemyMonSpecies2]         ; enemy Pokemon ID (without transform effect?)
-	call DeterminePaletteID
-	ld c, a
+	; ld a, [wEnemyMonSpecies2]         ; enemy Pokemon ID (without transform effect?)
+	; call DeterminePaletteID
+    ld a, [wEnemyBattleStatus3]
+    bit TRANSFORMED, a
+    ld a, PAL_GRAYMON
+    jr nz, .gotEnemyMonPal
+
+    ; Normal enemy: look up its palette from its species.
+    ld a, [wEnemyMonSpecies2]
+
+    ; B holds the player's palette. Our farcall macro uses B
+    ; for BANK(target), so preserve BC across the far call.
+    push bc
+    farcall DeterminePaletteIDOutOfBattle
+    pop bc
+
+.gotEnemyMonPal
+    ld c, a
 
 	ld a, $02
 	ldh [rWBK], a
@@ -280,8 +295,8 @@ SetPal_StatusScreen:
 	jr c, .pokemon
 	ld a, $1 ; not pokemon
 .pokemon
-	call DeterminePaletteID
-	ld b, a
+    farcall DeterminePaletteIDOutOfBattle
+    ld b, a
 
 	ld a, 2
 	ldh [rWBK], a
@@ -359,7 +374,7 @@ ENDC
 ; Show pokedex data
 SetPal_Pokedex:
 	ld a, [wCurPartySpecies]
-	call DeterminePaletteID
+	farcall DeterminePaletteIDOutOfBattle
 	ld d, a
 	ld e, 0
 
@@ -468,7 +483,7 @@ SetPal_Slots:
 ; Titlescreen with cycling pokemon
 SetPal_TitleScreen:
 	ld a, [wWhichTrade] ; Get the pokemon on the screen
-	call DeterminePaletteID
+	farcall DeterminePaletteIDOutOfBattle
 	ld d, a
 	ld e, 0
 
@@ -974,26 +989,41 @@ LoadTitleMonTilesAndPalettes:
 ; Determine palette for a player's/back-facing Pokemon sprite.
 ; Adapted from pokered-gbc.
 DetermineBackSpritePaletteID:
-	ld [wPokedexNum], a
+	; Index 0 represents the player/trainer back sprite.
 	and a
+	jr z, .playerSprite
 
+	; For an actual Pokemon, use the normal bank-safe
+	; species -> palette lookup.
 	push bc
-	predef IndexToPokedex
+	farcall DeterminePaletteIDOutOfBattle
 	pop bc
+	ret
 
-	ld a, [wPokedexNum]
-	ld hl, MonsterPalettes
-	and a
-	jr nz, .getPaletteID
-
-	; A zero dex number here represents the player/trainer sprite.
-	; Phase 1 uses the original RBY-style player palette.
+.playerSprite
 	ld a, PAL_REDMON
 	ret
+; DetermineBackSpritePaletteID:
+; 	ld [wPokedexNum], a
+; 	and a
 
-.getPaletteID
-	ld e, a
-	ld d, $00
-	add hl, de
-	ld a, [hl]
-	ret
+; 	push bc
+; 	predef IndexToPokedex
+; 	pop bc
+
+; 	ld a, [wPokedexNum]
+; 	ld hl, MonsterPalettes
+; 	and a
+; 	jr nz, .getPaletteID
+
+; 	; A zero dex number here represents the player/trainer sprite.
+; 	; Phase 1 uses the original RBY-style player palette.
+; 	ld a, PAL_REDMON
+; 	ret
+
+; .getPaletteID
+; 	ld e, a
+; 	ld d, $00
+; 	add hl, de
+; 	ld a, [hl]
+; 	ret
