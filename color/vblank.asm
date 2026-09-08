@@ -264,6 +264,220 @@ ENDR
 	ldh [rWBK], a
 	ret
 
+GbcVBlankHook::
+        push af
+        push bc
+        push hl
+
+        ; ------------------------------------------------------------
+        ; Schedule pre-VBlank palette preparation.
+        ;
+        ; Pikachu's Beach uses STAT Mode-0/HBlank (bit 3).
+        ; During normal gameplay, use the LYC source instead.
+        ; ------------------------------------------------------------
+        ldh a, [rSTAT]
+        bit 3, a
+        jr nz, .skipStatSetup
+
+        ldh a, [rIE]
+        or IE_STAT
+        ldh [rIE], a
+
+        ld a, $6e
+        ldh [rLYC], a
+
+        ldh a, [rSTAT]
+        or $40                     ; STAT LYC interrupt enable
+        ldh [rSTAT], a
+
+.skipStatSetup
+
+        ; ------------------------------------------------------------
+        ; Save the current SP while WRAM bank 1 is still visible.
+        ; hSPTemp is already used elsewhere for this exact purpose.
+        ; ------------------------------------------------------------
+        ld hl, sp + 0
+        ld a, h
+        ldh [hSPTemp], a
+        ld a, l
+        ldh [hSPTemp + 1], a
+
+        ; Save current WRAM bank in B.
+        ldh a, [rWBK]
+        ld b, a
+
+        ; Color engine state lives in WRAM bank 2.
+        ld a, 2
+        ldh [rWBK], a
+
+        ; Give routines called while WRAM2 is selected their own
+        ; temporary stack. Atozuke color state only occupies
+        ; $D000-$D7FF, so the upper half is available here.
+        ld sp, $dfff
+
+        ; ------------------------------------------------------------
+        ; The donor avoids refreshing palettes on frames where a
+        ; scrolling row/column was drawn.
+        ; ------------------------------------------------------------
+        ld hl, W2_DrewRowOrColumn
+        ld a, [hl]
+        and a
+        jr nz, .skipPaletteRefresh
+
+        call RefreshPalettesVBlank
+
+.skipPaletteRefresh
+        xor a
+        ld [W2_DrewRowOrColumn], a
+
+        ; ------------------------------------------------------------
+        ; Restore the original stack pointer BEFORE returning to
+        ; WRAM bank 1.
+        ; ------------------------------------------------------------
+        ldh a, [hSPTemp]
+        ld h, a
+        ldh a, [hSPTemp + 1]
+        ld l, a
+        ld sp, hl
+
+        ; Restore previous WRAM bank.
+        ld a, b
+        ldh [rWBK], a
+
+        ; Now the outer interrupt stack is visible again.
+        pop hl
+        pop bc
+        pop af
+        ret
+
+; GbcVBlankHook::
+; 	push af
+; 	push bc
+; 	push hl
+
+; 	; Normal GBC gameplay:
+; 	; schedule GbcPrepareVBlank through the LYC STAT interrupt.
+; 	;
+; 	; Pikachu's Beach uses STAT Mode-0/HBlank (bit 3), so don't
+; 	; enable our LYC source while that is active.
+; 	ldh a, [rSTAT]
+; 	bit 3, a
+; 	jr nz, .skipStatSetup
+
+; 	ldh a, [rIE]
+; 	or IE_STAT
+; 	ldh [rIE], a
+
+; 	ld a, $6e
+; 	ldh [rLYC], a
+
+; 	ldh a, [rSTAT]
+; 	or $40                     ; enable LYC=LY STAT interrupt
+; 	ldh [rSTAT], a
+
+; .skipStatSetup
+
+; 	; Save current WRAM bank in B.
+; 	; The stack lives in switchable WRAM, so after switching to
+; 	; WRAM bank 2 we must not push/pop/call until WRAM1 is restored.
+; 	ldh a, [rWBK]
+; 	ld b, a
+
+; 	ld a, 2
+; 	ldh [rWBK], a
+
+; 	; Known-safe diagnostic:
+; 	; upload one complete real CGB BG palette (8 bytes).
+; 	ld a, $80
+; 	ldh [rBGPI], a
+
+; 	ld hl, W2_BgPaletteData
+; 	ld c, 8
+
+; .loop
+; 	ld a, [hli]
+; 	ldh [rBGPD], a
+; 	dec c
+; 	jr nz, .loop
+
+; 	; Restore WRAM bank BEFORE touching the stack.
+; 	ld a, b
+; 	ldh [rWBK], a
+
+; 	pop hl
+; 	pop bc
+; 	pop af
+; 	ret
+
+; GbcVBlankHook::
+; 	push af
+; 	push bc
+; 	push hl
+
+; 	; Save current WRAM bank in B.
+; 	; Do not store it on the stack, because the stack itself
+; 	; lives in the switchable $D000-$DFFF region.
+; 	ldh a, [rWBK]
+; 	ld b, a
+
+; 	ld a, 2
+; 	ldh [rWBK], a
+
+; 	; Upload only real BG palette 0.
+; 	ld a, $80
+; 	ldh [rBGPI], a
+
+; 	ld hl, W2_BgPaletteData
+; 	ld c, 8
+
+; .loop
+; 	ld a, [hli]
+; 	ldh [rBGPD], a
+; 	dec c
+; 	jr nz, .loop
+
+; 	; Restore the original WRAM bank BEFORE touching the stack.
+; 	ld a, b
+; 	ldh [rWBK], a
+
+; 	pop hl
+; 	pop bc
+; 	pop af
+; 	ret
+
+; ; This is the last vblank-timing-sensitive thing that's called
+; GbcVBlankHook::
+; 	call UpdateMovingBgTiles ; Removed from caller to make space
+
+; 	; Use the hblank interrupt to get a head-start with vblank stuff
+; 	ldh a, [rIE]
+; 	or 2
+; 	ldh [rIE], a
+; 	ld a, $6e
+; 	ldh [rLYC], a
+; 	ldh a, [rSTAT]
+; 	or $40
+; 	ldh [rSTAT], a
+
+; 	ld a, 2
+; 	ldh [rWBK], a
+
+; 	; Don't try to refresh palette if a row or column was drawn this frame.
+; 	; This isn't really necessary, but it prevents a 1-frame artifact that occurs when
+; 	; transitioning between screens, where all sprites are white.
+; 	ld hl, W2_DrewRowOrColumn
+; 	ld a, [hl]
+; 	and a
+; 	jr nz, .end
+
+; 	call RefreshPalettesVBlank
+
+; .end
+; 	xor a
+; 	ld [W2_DrewRowOrColumn], a
+; 	ldh [rWBK], a
+; 	ret
+
 ; GbcVBlankHook::
 ; 	push af
 
@@ -342,74 +556,6 @@ ENDR
 ; 	pop af
 ; 	ret
 
-GbcVBlankHook::
-	push af
-	push bc
-	push hl
-
-	; Save current WRAM bank in B.
-	; Do not store it on the stack, because the stack itself
-	; lives in the switchable $D000-$DFFF region.
-	ldh a, [rWBK]
-	ld b, a
-
-	ld a, 2
-	ldh [rWBK], a
-
-	; Upload only real BG palette 0.
-	ld a, $80
-	ldh [rBGPI], a
-
-	ld hl, W2_BgPaletteData
-	ld c, 8
-
-.loop
-	ld a, [hli]
-	ldh [rBGPD], a
-	dec c
-	jr nz, .loop
-
-	; Restore the original WRAM bank BEFORE touching the stack.
-	ld a, b
-	ldh [rWBK], a
-
-	pop hl
-	pop bc
-	pop af
-	ret
-
-; ; This is the last vblank-timing-sensitive thing that's called
-; GbcVBlankHook::
-; 	call UpdateMovingBgTiles ; Removed from caller to make space
-
-; 	; Use the hblank interrupt to get a head-start with vblank stuff
-; 	ldh a, [rIE]
-; 	or 2
-; 	ldh [rIE], a
-; 	ld a, $6e
-; 	ldh [rLYC], a
-; 	ldh a, [rSTAT]
-; 	or $40
-; 	ldh [rSTAT], a
-
-; 	ld a, 2
-; 	ldh [rWBK], a
-
-; 	; Don't try to refresh palette if a row or column was drawn this frame.
-; 	; This isn't really necessary, but it prevents a 1-frame artifact that occurs when
-; 	; transitioning between screens, where all sprites are white.
-; 	ld hl, W2_DrewRowOrColumn
-; 	ld a, [hl]
-; 	and a
-; 	jr nz, .end
-
-; 	call RefreshPalettesVBlank
-
-; .end
-; 	xor a
-; 	ld [W2_DrewRowOrColumn], a
-; 	ldh [rWBK], a
-; 	ret
 
 ; If necessary, copy palettes which were generated in the pre-vblank routines.
 ; It takes ~1024 cycles (1.1 scanlines) to write 8 palettes.

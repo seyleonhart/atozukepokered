@@ -40,6 +40,24 @@ FillBgMap:: ; marcelnote - new, fill with character in a
 ; However, this function is also called repeatedly to redraw the whole screen
 ; when necessary. It is also used in trade animation and elevator code.
 RedrawRowOrColumn::
+IF DEF(_ATOZUKE_GBC)
+	ldh a, [hRedrawRowOrColumnMode]
+	and a
+	ret z
+	ld b, a
+	xor a
+	ldh [hRedrawRowOrColumnMode], a
+	dec b
+	jr nz, .redrawRowGBC
+
+	CALL_INDIRECT DrawMapColumn
+	ret
+
+.redrawRowGBC
+	CALL_INDIRECT DrawMapRow
+	ret
+
+ELSE
 	ldh a, [hRedrawRowOrColumnMode]
 	and a
 	ret z
@@ -107,6 +125,7 @@ RedrawRowOrColumn::
 	dec c
 	jr nz, .loop2
 	ret
+ENDC
 
 ; This function automatically transfers tile number data from the tile map at
 ; wTileMap to VRAM during V-blank. Note that it only transfers one third of the
@@ -116,6 +135,17 @@ RedrawRowOrColumn::
 ; the above function, RedrawRowOrColumn, is used when walking to
 ; improve efficiency.
 AutoBgMapTransfer::
+IF DEF(_ATOZUKE_GBC)
+	; pokered-gbc color-aware automatic window/tilemap refresh.
+	ld a, BANK(RefreshWindow)
+	ld [rROMB], a
+	call RefreshWindow
+
+	; Restore the ROM bank expected by the interrupted code.
+	ldh a, [hLoadedROMBank]
+	ld [rROMB], a
+	ret
+ELSE
 	ldh a, [hAutoBGTransferEnabled]
 	and a
 	ret z
@@ -162,9 +192,15 @@ AutoBgMapTransfer::
 .doTransfer
 	ldh [hAutoBGTransferPortion], a ; store next portion
 	ld b, SCREEN_HEIGHT / 3
+ENDC
 
 TransferBgRows::
 ; unrolled loop and using pop for speed
+IF DEF(_ATOZUKE_GBC)
+	ld a, BANK(WindowTransferBgRowsAndColors)
+	ld [rROMB], a
+	jp WindowTransferBgRowsAndColors
+ELSE
 REPT SCREEN_WIDTH / 2 - 1
 	pop de
 	ld [hl], e
@@ -192,6 +228,7 @@ ENDR
 	ld l, a
 	ld sp, hl
 	ret
+ENDC
 
 ; Copies [hVBlankCopyBGNumRows] rows from hVBlankCopyBGSource to hVBlankCopyBGDest.
 ; If hVBlankCopyBGSource is XX00, the transfer is disabled.
