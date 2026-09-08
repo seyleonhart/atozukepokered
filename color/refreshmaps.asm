@@ -1,48 +1,57 @@
 ; Most of the functions here are called during vblank, maybe they belong in vblank.asm...
 
 
+IF DEF(_ATOZUKE_GBC)
+
 ; Called when a map is loaded. Loads tilemap and tile attributes.
-; LCD is disabled, so we have free reign over vram.
+; LCD is disabled, so we have free reign over VRAM.
 LoadMapVramAndColors::
-	ld a, $02
-	ldh [rWBK], a
+    ld a, $02
+    ldh [rWBK], a
 
-	hlcoord 0, 0
-	ld de, vBGMap0
-	ld b, SCREEN_HEIGHT
+    hlcoord 0, 0
+    ld de, vBGMap0
+    ld b, SCREEN_HEIGHT
+
 .vramCopyLoop
-	ld c, SCREEN_WIDTH
+    ld c, SCREEN_WIDTH
+
 .vramCopyInnerLoop
-	ld a, $01
-	ldh [rVBK], a
-	ld a, [hl]
-	push hl
-	ld h, W2_TilesetPaletteMap >> 8
-	ld l, a
-	ld a, [hl]
-	ld [de], a
-	pop hl
-	xor a
-	ldh [rVBK], a
-	ld a, [hli]
-	ld [de], a
-	inc e
+    ld a, $01
+    ldh [rVBK], a
 
-	dec c
-	jr nz, .vramCopyInnerLoop
-	ld a, TILEMAP_WIDTH - SCREEN_WIDTH
-	add e
-	ld e, a
-	jr nc, .noCarry
-	inc d
+    ld a, [hl]
+    push hl
+    ld h, W2_TilesetPaletteMap >> 8
+    ld l, a
+    ld a, [hl]
+    ld [de], a
+    pop hl
+
+    xor a
+    ldh [rVBK], a
+
+    ld a, [hli]
+    ld [de], a
+    inc e
+
+    dec c
+    jr nz, .vramCopyInnerLoop
+
+    ld a, TILEMAP_WIDTH - SCREEN_WIDTH
+    add e
+    ld e, a
+    jr nc, .noCarry
+    inc d
 .noCarry
-	dec b
-	jr nz, .vramCopyLoop
+    dec b
+    jr nz, .vramCopyLoop
 
-	xor a
-	ldh [rWBK], a
-	ret
+    xor a
+    ldh [rWBK], a
+    ret
 
+ENDC
 
 
 ; Refresh 1/3 of the window each frame. Called during vblank.

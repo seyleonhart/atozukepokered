@@ -2255,6 +2255,34 @@ LoadMapData::
 	call LoadTileBlockMap
 	call LoadTilesetTilePatternData
 	call LoadCurrentMapView
+
+IF DEF(_ATOZUKE_GBC)
+
+    ; Load the tileset palette tables before generating BGMap0 attributes.
+    ; LCD is still disabled here, so SetPal_Overworld skips its 2-frame delay.
+    ld b, SET_PAL_OVERWORLD
+    call RunPaletteCommand
+
+    ; ; Donor uses a ROM0 trampoline at $0000, but Atozuke reserves
+    ; ; RST $00 for Bankswitch. Call the real routine through our
+    ; ; bank-aware dispatcher instead.
+    ; CALL_INDIRECT LoadMapVramAndColors
+
+	; Preserve the ROM bank tracked by the overworld.
+    ldh a, [hLoadedROMBank]
+    push af
+
+    ; LoadMapVramAndColors does not need hLoadedROMBank itself,
+    ; so only change the physical ROM bank like the donor trampoline.
+    ld a, BANK(LoadMapVramAndColors)
+    ld [rROMB], a
+    call LoadMapVramAndColors
+
+    ; Restore the physical bank without disturbing hLoadedROMBank.
+    pop af
+    ld [rROMB], a
+ELSE
+
 ; copy current map view to VRAM
 	hlcoord 0, 0
 	ld de, vBGMap0
@@ -2275,14 +2303,17 @@ LoadMapData::
 	ld d, a ; de += a
 	dec b
 	jr nz, .vramCopyLoop
+ENDC
 	ld a, 1
 	ld [wUpdateSpritesEnabled], a
 	ld a, SCREEN_HEIGHT_PX ; marcelnote - moved from ClearVariablesOnEnterMap to hide the window before EnableLCD
 	ldh [hWY], a
 	ldh [rWY], a
 	call EnableLCD
-	ld b, SET_PAL_OVERWORLD
-	call RunPaletteCommand
+IF !DEF(_ATOZUKE_GBC)
+    ld b, SET_PAL_OVERWORLD
+    call RunPaletteCommand
+ENDC
 	call LoadPlayerSpriteGraphics
 	ld a, [wStatusFlags6]
 	and (1 << BIT_FLY_WARP) | (1 << BIT_DUNGEON_WARP)
