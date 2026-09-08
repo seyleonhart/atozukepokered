@@ -1,12 +1,38 @@
 
 ; Prepare stuff to be done during vblank
 ; This is called from the lcd interrupt, at line $70
+; GbcPrepareVBlank::
+; 	ld a, 2
+; 	ldh [rWBK], a
+; 	call RefreshWindowPalettesPreVBlank
+; 	call RefreshPalettesPreVBlank
+; 	xor a
+; 	ldh [rWBK], a
+; 	ret
+
 GbcPrepareVBlank::
+	; Save whichever WRAM bank was active when the STAT interrupt fired.
+	ldh a, [rWBK]
+	ld b, a
+
+	; Switch to the color engine's WRAM2.
 	ld a, 2
 	ldh [rWBK], a
+
+	; The outer return address is currently in the original WRAM bank.
+	; From this point until we restore that bank, all nested stack usage
+	; deliberately happens in WRAM2.
+	push bc
+
 	call RefreshWindowPalettesPreVBlank
 	call RefreshPalettesPreVBlank
-	xor a
+
+	; Recover the original WRAM bank while WRAM2 is still selected.
+	pop bc
+	ld a, b
+
+	; Restore the original bank BEFORE RET, so GbcPrepareVBlank's
+	; return address becomes visible again.
 	ldh [rWBK], a
 	ret
 

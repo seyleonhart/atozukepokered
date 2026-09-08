@@ -913,6 +913,28 @@ ENDC
 	ldh [rWBK], a
 	ret
 
+	; ; Wait 2 frames before updating palettes. TEMPORARY PATCH
+    ; ;
+    ; ; Atozuke's stack lives in switchable WRAM. Do not leave WRAM2
+    ; ; selected across DelayFrames, because STAT/VBlank interrupts can
+    ; ; occur during the wait.
+    ; xor a
+    ; ldh [rWBK], a
+
+    ; ld c, 2
+    ; call DelayFrames
+
+    ; ; Re-enter WRAM2 to update the color-engine flag.
+    ; ld a, 2
+    ; ldh [rWBK], a
+
+    ; ld a, 1
+    ; ld [W2_ForceBGPUpdate], a
+
+    ; ; Restore normal WRAM bank.
+    ; ldh [rWBK], a
+    ; ret
+
 
 ; Clear colors after titlescreen
 SetPal_OakIntro:
